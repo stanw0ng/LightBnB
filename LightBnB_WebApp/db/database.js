@@ -17,16 +17,15 @@ const pool = new Pool({
  * @param {String} email The email of the user.
  * @return {Promise<{}>} A promise to the user.
  */
-const getUserWithEmail = function (email) {
-  let resolvedUser = null;
-  for (const userId in users) {
-    const user = users[userId];
-    if (user.email.toLowerCase() === email.toLowerCase()) {
-      resolvedUser = user;
-    }
-  }
-  return Promise.resolve(resolvedUser);
-};
+
+const getUserWithEmail = function(email) {
+  return pool.query(`
+  SELECT * FROM users
+  WHERE email = $1
+  `, [email])
+  .then(res => res.rows[0])
+  .catch((err => console.error('query error', err.stack)));
+}
 
 /**
  * Get a single user from the database given their id.
@@ -68,6 +67,7 @@ const getAllReservations = function (guest_id, limit = 10) {
  * @param {*} limit The number of results to return.
  * @return {Promise<[{}]>}  A promise to the properties.
  */
+
 const getAllProperties = (options, limit = 10) => {
   return pool
     .query(`SELECT * FROM properties LIMIT $1`, [limit])
